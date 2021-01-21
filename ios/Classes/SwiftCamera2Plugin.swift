@@ -97,7 +97,7 @@ private class CameraProviderHolder {
         
         // Set preferred resolution
         if let preferredPhotoSize = previewArgs.preferredPhotoSize {
-            session.sessionPreset = presetFromPreferredResolution(size: preferredPhotoSize)
+            session.sessionPreset = presetFromPreferredResolution(size: preferredPhotoSize, session: session)
         } else {
             session.sessionPreset = .photo
         }
@@ -142,17 +142,17 @@ private class CameraProviderHolder {
         activePreviewOutputs.setObject(output, forKey: NSNumber(value: viewId))
         activePreviewSessions.setObject(session, forKey: NSNumber(value: viewId))
     }
-    
-    private func presetFromPreferredResolution(size: CGSize) -> AVCaptureSession.Preset {
+
+    private func presetFromPreferredResolution(size: CGSize, session: AVCaptureSession) -> AVCaptureSession.Preset {
         let pixels = size.width * size.height
-        if (pixels <= 1280 * 720) {
-            return .hd1280x720
+        if (pixels > 1920 * 1080 && pixels <= 3840 * 2160 && session.canSetSessionPreset(.hd4K3840x2160)) {
+            return .hd4K3840x2160
         }
-        if (pixels <= 1920 * 1080) {
+        if (pixels > 1280 * 720 && pixels <= 1920 * 1080 && session.canSetSessionPreset(.hd1920x1080)) {
             return .hd1920x1080
         }
-        if (pixels <= 3840 * 2160) {
-            return .hd4K3840x2160
+        if (pixels <= 1280 * 720 && session.canSetSessionPreset(.hd1280x720)) {
+            return .hd1280x720
         }
         return .photo
     }
